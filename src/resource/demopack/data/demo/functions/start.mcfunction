@@ -1,0 +1,1 @@
+scoreboard players set Start func 1
