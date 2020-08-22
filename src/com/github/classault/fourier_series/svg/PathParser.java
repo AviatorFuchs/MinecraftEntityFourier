@@ -25,8 +25,17 @@ public class PathParser {
 
     private void build(byte[] dRaw) {
         ByteArrayOutputStream os = new ByteArrayOutputStream();
+        boolean notStarted = true;
         for (int i = 0; i < dRaw.length; i++) {
             byte b = dRaw[i];
+            if (notStarted && (b == ' ' || b == ',' || b == '\t' || b == '\n' || b == '\r')) {
+                continue;
+            }
+            if (notStarted && (b == 'M' || b == 'm')) {
+                notStarted = false;
+                os.write(b);
+                continue;
+            }
             if (i != 0 && isCommand(b)) {
                 byte[] cached = os.toByteArray();
                 os.reset();
@@ -239,6 +248,13 @@ public class PathParser {
                 double ex = Double.parseDouble(s[5]);
                 double ey = Double.parseDouble(s[6]);
                 Command A;
+                if ((absolute && ex == lastCommand.ep_x() && ey == lastCommand.ep_y()) || (!absolute && ex == 0d && ey == 0d)) {
+                    System.out.println("\t> MATHEMATICAL ERROR DETECTED BY " + getClass().getName());
+                    System.out.println("\t> WARNING: Your ellipse is mathematically wrong.");
+                    System.out.println("\t> The start point and the end point from the argument are the same.");
+                    System.out.println("\t> This ellipse arc command will be ignored.");
+                    return;
+                }
                 if (absolute) {
                     A = new CommandEllipticalArc(lastCommand.ep_x(), lastCommand.ep_y(), a, b, an, at, di, ex, ey);
                 } else {
