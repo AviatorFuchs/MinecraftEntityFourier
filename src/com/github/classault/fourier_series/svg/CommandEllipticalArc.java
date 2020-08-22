@@ -121,11 +121,34 @@ public class CommandEllipticalArc implements Command {
         double du = u2 - u1;
         double dv = v2 - v1;
 
-        double deltaU = (a * a) / ((a * a * dv * dv) + (b * b * du * du)) - 1d / (4 * b * b);
-        double deltaV = (b * b) / ((a * a * dv * dv) + (b * b * du * du)) - 1d / (4 * a * a);
+        double dp = (u2 - u1) / a;
+        double dq = (v2 - v1) / b;
 
-        double u0 = 0.5 * (u1 + u2) + (Math.abs(2 * (arcType + direction - 1)) - 1) * a * dv * Math.sqrt(deltaU);
-        double v0 = 0.5 * (v1 + v2) - (Math.abs(2 * (arcType + direction - 1)) - 1) * b * du * Math.sqrt(deltaV);
+        double lengthInFact = Math.sqrt((START_X - EP_X) * (START_X - EP_X) + (START_Y - EP_Y) * (START_Y - EP_Y));
+        double distInFact = Math.sqrt(dp * dp + dq * dq);
+
+        double u0, v0;
+        if (distInFact > 2.0) {
+            double expectedLength = 2 * Math.sqrt((du / distInFact) * (du / distInFact) + (dv / distInFact) * (dv / distInFact));
+            System.out.println("\t> MATHEMATICAL ERROR DETECTED BY " + getClass().getName());
+            System.out.println("\t> WARNING: Your ellipse is mathematically wrong.");
+            System.out.println("\t> Using this tilt angle, the longest distance between to points on this ellipse should be: " + expectedLength);
+            System.out.println("\t> But the ellipse builder found out that the real distance is: " + lengthInFact);
+            System.out.println("\t> Draw this ellipse using such arguments on the draft yourself, and see whatever can be presented.");
+            System.out.println("\t> The ellipse will be enlarged by " + distInFact / 2 + " times.");
+            a *= (distInFact / 2);
+            b *= (distInFact / 2);
+            R *= (distInFact / 2);
+            r *= (distInFact / 2);
+            u0 = 0.5 * (u1 + u2);
+            v0 = 0.5 * (v1 + v2);
+        } else {
+            double deltaU = (a * a) / ((a * a * dv * dv) + (b * b * du * du)) - 1d / (4 * b * b);
+            double deltaV = (b * b) / ((a * a * dv * dv) + (b * b * du * du)) - 1d / (4 * a * a);
+
+            u0 = 0.5 * (u1 + u2) + (Math.abs(2 * (arcType + direction - 1)) - 1) * a * dv * Math.sqrt(deltaU);
+            v0 = 0.5 * (v1 + v2) - (Math.abs(2 * (arcType + direction - 1)) - 1) * b * du * Math.sqrt(deltaV);
+        }
 
         double cosU1 = (u1 - u0) / a;
         double cosU2 = (u2 - u0) / a;
