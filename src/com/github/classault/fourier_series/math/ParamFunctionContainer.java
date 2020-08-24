@@ -31,8 +31,8 @@ public class ParamFunctionContainer {
             double omega = 2 * Math.PI / T;
             while (t < T) {
                 ParamFunction paramFunction = functions.get((int) (t));
-                cosA += (1d / T) * paramFunction.calc(t) * Math.cos(n * omega * t) * dt;
-                sinA += (1d / T) * paramFunction.calc(t) * Math.sin(n * omega * t) * dt;
+                cosA += (2d / T) * paramFunction.calc(t) * Math.cos(n * omega * t) * dt;
+                sinA += (2d / T) * paramFunction.calc(t) * Math.sin(n * omega * t) * dt;
                 t += dt;
             }
 
