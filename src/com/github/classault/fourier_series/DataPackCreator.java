@@ -87,7 +87,8 @@ class DataPackCreator {
         List<EllipseVector> vectors = wrapper.getVectors();
 
         StringBuilder en = new StringBuilder();
-        String base = sep.replace("<t>", "vector0");
+        double zPhase = rotationValue(wrapper.baseX, wrapper.baseY);
+        String base = scp.replace("<THIS>", "vector0").replace("<TOWARDS_NEXT>", rf.format(zPhase));
         en.append(base);
 
         int i = 1;
@@ -104,9 +105,9 @@ class DataPackCreator {
             en.append(sn);
             i++;
         }
-        String fp = scp.replace("<THIS>", "vector" + i).replace("<TOWARDS_NEXT>", rf.format(0));
+        String PEN = scp.replace("<THIS>", "PEN").replace("<TOWARDS_NEXT>", rf.format(0));
 
-        en.append(fp);
+        en.append(PEN);
         en.append("scoreboard objectives add func dummy {\"text\":\"Data\",\"color\":\"aqua\"}\r\n");
         en.append("scoreboard players set Start func 0\r\n");
         en.append("scoreboard players set Follow func 0\r\n");
@@ -139,7 +140,7 @@ class DataPackCreator {
         String rcp = "execute as @e[name=<T>,sort=nearest,limit=1] at @s run tp @s ~ ~ ~ ~<w> ~\r\n";
         String kcp = "kill @e[name=<t>]\r\n";
         String pcp = "execute as @e[name=<T>,sort=nearest,limit=1] at @s run tp @p ^ ^25 ^\r\n";
-        String bcp = "execute as @e[name=<T>,sort=nearest,limit=1] at @s run setblock ^ ^-1 ^ <b>\r\n";
+        String bcp = "execute as @e[name=PEN,sort=nearest,limit=1] at @s run setblock ^ ^-1 ^ <b>\r\n";
         String esc = "scoreboard players set Follow func 0";
         String spy = "scoreboard players set Follow func 1";
 
@@ -151,12 +152,16 @@ class DataPackCreator {
         StringBuilder rotateBuilder = new StringBuilder();
         StringBuilder killerBuilder = new StringBuilder();
         killerBuilder.append("kill @e[name=vector0]\r\n");
+        double zDistance = Math.sqrt(wrapper.baseX * wrapper.baseX + wrapper.baseY + wrapper.baseY);
+        String zP = vcp.replaceAll("<THIS>", "vector0").replaceAll("<NEXT>", "vector1").replace("<d>", df.format(zDistance * rad));
+        vectorBuilder.append(zP);
+
         for (EllipseVector vector : vectors) {
             double pw = Math.toDegrees((velocityBase * i));
             double nw = Math.toDegrees((-1) * (velocityBase * i));
             String tagP = "vector" + i;
             String tagN = "vector" + (-i);
-            String next = "vector" + (i + 1);
+            String next = i < level ? "vector" + (i + 1) : "PEN";
 
             String rP = rcp.replaceAll("<T>", tagP).replace("<w>", rf.format(pw));
             String rN = rcp.replaceAll("<T>", tagN).replace("<w>", rf.format(nw));
@@ -171,11 +176,11 @@ class DataPackCreator {
             i++;
         }
 
-        String kF = kcp.replaceAll("<t>", "vector" + i);
+        String kF = kcp.replaceAll("<t>", "PEN");
         killerBuilder.append(kF);
 
-        String tp = pcp.replaceAll("<T>", "vector" + (1 - i));
-        String sb = bcp.replaceAll("<T>", "vector" + (1 - i)).replaceAll("<b>", block);
+        String tp = pcp.replaceAll("<T>", "PEN");
+        String sb = bcp.replaceAll("<T>", "PEN").replaceAll("<b>", block);
         vectorBuilder.append(sb);
         rotateBuilder.append("\r\n");
         String rot = rotateBuilder.toString();
