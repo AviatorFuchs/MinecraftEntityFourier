@@ -9,6 +9,7 @@ import java.io.IOException;
 import java.io.OutputStream;
 import java.text.DecimalFormat;
 import java.util.List;
+import java.util.Objects;
 
 class DataPackCreator {
     private String name;
@@ -22,6 +23,7 @@ class DataPackCreator {
     private DecimalFormat df = new DecimalFormat("0.00000000");
     private DecimalFormat rf = new DecimalFormat("0.0000");
     private final String home;
+    private final String addOnNBT;
 
     DataPackCreator(String home, String name, String namespace, String entity, String block, int angularVelocity , int size, int level, EllipseVectorContainer wr) {
         DataPackNamespaceChecker checker = new DataPackNamespaceChecker();
@@ -37,6 +39,7 @@ class DataPackCreator {
         this.size = size;
         this.wrapper = wr;
         this.home = home;
+        this.addOnNBT = Objects.equals(entity, "area_effect_cloud") ? ",Duration:2147483647,Age:0" : "";
     }
 
     void createDataPack() {
@@ -83,7 +86,7 @@ class DataPackCreator {
      */
     private void makeEntryFunctions() {
         final String sep = "summon <e> ~ ~ ~ {CustomName:\"{\\\"text\\\":\\\"vector0\\\",\\\"color\\\":\\\"green\\\"}\",CustomNameVisible:1b,NoGravity:1b,Marker:1b}\r\n".replace("<e>", entity);
-        final String scp = "summon <e> ~ ~ ~ {CustomName:\"{\\\"text\\\":\\\"<THIS>\\\",\\\"color\\\":\\\"yellow\\\"}\",Marker:1b,CustomNameVisible:1b,NoGravity:1b,Rotation:[<TOWARDS_NEXT>f,0f]}\r\n".replace("<e>", entity);
+        final String scp = "summon <e> ~ ~ ~ {CustomName:\"{\\\"text\\\":\\\"<THIS>\\\",\\\"color\\\":\\\"yellow\\\"}\",Marker:1b,CustomNameVisible:1b,NoGravity:1b,Rotation:[<TOWARDS_NEXT>f,0f]<ADD>}\r\n".replace("<e>", entity).replace("<ADD>", addOnNBT);
         List<EllipseVector> vectors = wrapper.getVectors();
 
         StringBuilder en = new StringBuilder();
@@ -136,8 +139,8 @@ class DataPackCreator {
      *      clear entities
      */
     private void makeMainFunctions() {
-        String vcp = "execute as @e[name=<THIS>,sort=nearest,limit=1] at @s run tp @e[name=<NEXT>,sort=nearest,limit=1] ^ ^ ^<d>\r\n";
-        String rcp = "execute as @e[name=<T>,sort=nearest,limit=1] at @s run tp @s ~ ~ ~ ~<w> ~\r\n";
+        String vcp = "execute as @e[type=<TY>,name=<THIS>,sort=nearest,limit=1] at @s run tp @e[name=<NEXT>,sort=nearest,limit=1] ^ ^ ^<d>\r\n".replace("<TY>", entity);
+        String rcp = "execute as @e[type=<TY>,name=<T>,sort=nearest,limit=1] at @s run tp @s ~ ~ ~ ~<w> ~\r\n".replace("<TY>", entity);
         String kcp = "kill @e[name=<t>]\r\n";
         String pcp = "execute as @e[name=<T>,sort=nearest,limit=1] at @s run tp @p ^ ^25 ^\r\n";
         String bcp = "execute as @e[name=PEN,sort=nearest,limit=1] at @s run setblock ^ ^-1 ^ <b>\r\n";
